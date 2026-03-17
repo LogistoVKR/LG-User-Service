@@ -1,0 +1,36 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /user-service
+
+spring:
+  application:
+    name: lg-user-service
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    properties:
+      hibernate:
+        default_schema: mc_user_service
+    show-sql: true
+  flyway:
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    locations: classpath:db/migration
+    default-schema: ${spring.jpa.properties.hibernate.default_schema}
+logging:
+  level:
+    root: info
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.99, 0.95, 0.9, 0.5
