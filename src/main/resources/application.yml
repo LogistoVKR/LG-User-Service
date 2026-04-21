@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8082
   servlet:
     context-path: /user-service
 
@@ -19,6 +19,19 @@ spring:
     password: ${spring.datasource.password}
     locations: classpath:db/migration
     default-schema: ${spring.jpa.properties.hibernate.default_schema}
+application:
+  chat:
+    websocket:
+      anonymous-path: /ws/chat/anonymous
+      employee-path: /ws/chat/employee
+      ping-retries: 3
+      ping-interval: 30s
+      message-buffer-size: 8192
+      allowed-origins:
+        - "*"
+      max-session-idle-timeout: 10m
+      send-time-limit: 5s
+
 logging:
   level:
     root: info
