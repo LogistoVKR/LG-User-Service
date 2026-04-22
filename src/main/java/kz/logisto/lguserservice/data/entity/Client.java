@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -34,6 +35,7 @@ public class Client {
   private LocalDate dateOfBirth;
   private String email;
   private String phoneNumber;
+  private BigDecimal personalDiscount;
 
   @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.DETACH})
   @JoinColumn(name = "organization_id")

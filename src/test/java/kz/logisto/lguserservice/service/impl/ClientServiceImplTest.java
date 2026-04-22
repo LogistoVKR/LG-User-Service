@@ -23,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.List;
@@ -55,7 +56,7 @@ class ClientServiceImplTest {
   void create_withWarehouseAccess_createsClient() {
     UUID orgId = UUID.randomUUID();
     CreateClientDto dto = new CreateClientDto("John", "Doe", null, LocalDate.of(1990, 1, 1),
-        "john@test.com", "+77001234567", orgId);
+        "john@test.com", "+77001234567", orgId, null);
     Organization org = new Organization();
     org.setId(orgId);
     Client client = new Client();
@@ -76,7 +77,7 @@ class ClientServiceImplTest {
   @Test
   void create_withoutAccess_throwsForbidden() {
     UUID orgId = UUID.randomUUID();
-    CreateClientDto dto = new CreateClientDto("John", "Doe", null, null, null, null, orgId);
+    CreateClientDto dto = new CreateClientDto("John", "Doe", null, null, null, null, orgId, null);
 
     when(organizationAccessService.canManageWarehouse("user-1", orgId)).thenReturn(false);
 
@@ -87,7 +88,7 @@ class ClientServiceImplTest {
   void update_existingClient_updatesFields() {
     UUID clientId = UUID.randomUUID();
     UUID orgId = UUID.randomUUID();
-    UpdateClientDto dto = new UpdateClientDto("Jane", "Doe", null, null, null, null);
+    UpdateClientDto dto = new UpdateClientDto("Jane", "Doe", null, null, null, null, null);
     Organization org = new Organization();
     org.setId(orgId);
     Client client = new Client();
@@ -109,7 +110,7 @@ class ClientServiceImplTest {
   @Test
   void update_notFound_throwsNotFoundException() {
     UUID clientId = UUID.randomUUID();
-    UpdateClientDto dto = new UpdateClientDto("Jane", null, null, null, null, null);
+    UpdateClientDto dto = new UpdateClientDto("Jane", null, null, null, null, null, null);
 
     when(clientRepository.findById(clientId)).thenReturn(Optional.empty());
 
@@ -120,7 +121,7 @@ class ClientServiceImplTest {
   void update_withoutAccess_throwsForbidden() {
     UUID clientId = UUID.randomUUID();
     UUID orgId = UUID.randomUUID();
-    UpdateClientDto dto = new UpdateClientDto("Jane", null, null, null, null, null);
+    UpdateClientDto dto = new UpdateClientDto("Jane", null, null, null, null, null, null);
     Organization org = new Organization();
     org.setId(orgId);
     Client client = new Client();
@@ -197,5 +198,55 @@ class ClientServiceImplTest {
     Page<ClientModel> result = clientService.findAll(orgId, filter, pageable, principal);
 
     assertEquals(1, result.getTotalElements());
+  }
+
+  @Test
+  void create_withDiscount_createsClient() {
+    UUID orgId = UUID.randomUUID();
+    BigDecimal discount = new BigDecimal("15.50");
+    CreateClientDto dto = new CreateClientDto("John", "Doe", null, LocalDate.of(1990, 1, 1),
+        "john@test.com", "+77001234567", orgId, discount);
+    Organization org = new Organization();
+    org.setId(orgId);
+    Client client = new Client();
+    client.setPersonalDiscount(discount);
+    ClientModel model = new ClientModel();
+    model.setPersonalDiscount(discount);
+
+    when(organizationAccessService.canManageWarehouse("user-1", orgId)).thenReturn(true);
+    when(organizationService.getReferenceById(orgId)).thenReturn(org);
+    when(clientMapper.toEntity(dto)).thenReturn(client);
+    when(clientRepository.save(client)).thenReturn(client);
+    when(clientMapper.toModel(client)).thenReturn(model);
+
+    ClientModel result = clientService.create(dto, principal);
+
+    assertEquals(discount, result.getPersonalDiscount());
+    verify(clientRepository).save(client);
+  }
+
+  @Test
+  void update_withDiscount_updatesDiscount() {
+    UUID clientId = UUID.randomUUID();
+    UUID orgId = UUID.randomUUID();
+    BigDecimal discount = new BigDecimal("25.00");
+    UpdateClientDto dto = new UpdateClientDto(null, null, null, null, null, null, discount);
+    Organization org = new Organization();
+    org.setId(orgId);
+    Client client = new Client();
+    client.setId(clientId);
+    client.setOrganization(org);
+    ClientModel model = new ClientModel();
+    model.setPersonalDiscount(discount);
+
+    when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
+    when(organizationAccessService.canManageWarehouse("user-1", orgId)).thenReturn(true);
+    when(clientRepository.save(client)).thenReturn(client);
+    when(clientMapper.toModel(client)).thenReturn(model);
+
+    ClientModel result = clientService.update(clientId, dto, principal);
+
+    assertEquals(discount, result.getPersonalDiscount());
+    verify(clientMapper).updateEntity(client, dto);
   }
 }

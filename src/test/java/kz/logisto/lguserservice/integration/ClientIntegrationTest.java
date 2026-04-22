@@ -7,6 +7,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -83,5 +84,23 @@ class ClientIntegrationTest extends BaseIntegrationTest {
   void countByOrganizationId_noClients_returnsZero() {
     int count = clientRepository.countByOrganization_Id(org.getId());
     assertEquals(0, count);
+  }
+
+  @Test
+  void createClient_withPersonalDiscount_persistsCorrectly() {
+    Client client = createClient(org, "John", "Doe");
+    client.setPersonalDiscount(new BigDecimal("10.50"));
+    clientRepository.save(client);
+
+    Client found = clientRepository.findById(client.getId()).orElseThrow();
+    assertEquals(0, new BigDecimal("10.50").compareTo(found.getPersonalDiscount()));
+  }
+
+  @Test
+  void createClient_withoutDiscount_defaultsToNull() {
+    Client client = createClient(org, "John", "Doe");
+
+    Client found = clientRepository.findById(client.getId()).orElseThrow();
+    assertNull(found.getPersonalDiscount());
   }
 }
