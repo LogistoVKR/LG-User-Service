@@ -1,5 +1,6 @@
 package kz.logisto.lguserservice.data.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -20,4 +21,5 @@ public class ClientModel {
   private LocalDate dateOfBirth;
   private String email;
   private String phoneNumber;
+  private BigDecimal personalDiscount;
 }

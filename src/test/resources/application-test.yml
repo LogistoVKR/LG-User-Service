@@ -1,0 +1,42 @@
+server:
+  port: 0
+  servlet:
+    context-path: /user-service
+
+spring:
+  application:
+    name: lg-user-service-test
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    properties:
+      hibernate:
+        default_schema: mc_user_service
+    show-sql: false
+  flyway:
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    locations: classpath:db/migration
+    default-schema: ${spring.jpa.properties.hibernate.default_schema}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9090/realms/logisto
+          jwk-set-uri: http://localhost:9090/realms/logisto/protocol/openid-connect/certs
+  main:
+    allow-bean-definition-overriding: true
+
+application:
+  chat:
+    websocket:
+      anonymous-path: /ws/chat/anonymous
+      employee-path: /ws/chat/employee
+      ping-retries: 3
+      ping-interval: 30s
+      message-buffer-size: 8192
+      allowed-origins:
+        - "*"
+      max-session-idle-timeout: 10m
+      send-time-limit: 5s
