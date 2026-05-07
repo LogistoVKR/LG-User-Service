@@ -9,6 +9,7 @@ import kz.logisto.lguserservice.data.model.ClientModel;
 import kz.logisto.lguserservice.data.model.CountUserClientModel;
 import kz.logisto.lguserservice.data.model.OrganizationModel;
 import kz.logisto.lguserservice.data.model.OrganizationUserModel;
+import kz.logisto.lguserservice.data.model.OzonApiKeyModel;
 import kz.logisto.lguserservice.data.model.UserOrganizationModel;
 import kz.logisto.lguserservice.service.ClientService;
 import kz.logisto.lguserservice.service.OrganizationAccessService;
@@ -87,6 +88,17 @@ public class OrganizationController {
   public ResponseEntity<CountUserClientModel> countUserClient(@PathVariable UUID id,
                                                               Principal principal) {
     return ResponseEntity.ok(countService.countUserClient(id, principal));
+  }
+
+  @GetMapping("/{id}/ozon-api-key")
+  public ResponseEntity<OzonApiKeyModel> getOzonApiKey(@PathVariable UUID id) {
+    return ResponseEntity.ok(organizationService.getOzonApiKey(id));
+  }
+
+  @DeleteMapping("/{id}/ozon-api-key")
+  public ResponseEntity<Void> deleteOzonApiKey(@PathVariable UUID id, Principal principal) {
+    organizationService.deleteOzonApiKey(id, principal);
+    return ResponseEntity.noContent().build();
   }
 
   @PostMapping

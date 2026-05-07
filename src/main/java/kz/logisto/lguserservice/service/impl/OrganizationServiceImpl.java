@@ -4,6 +4,7 @@ import kz.logisto.lguserservice.data.dto.organization.OrganizationDto;
 import kz.logisto.lguserservice.data.entity.Organization;
 import kz.logisto.lguserservice.data.entity.User;
 import kz.logisto.lguserservice.data.model.OrganizationModel;
+import kz.logisto.lguserservice.data.model.OzonApiKeyModel;
 import kz.logisto.lguserservice.data.repository.OrganizationRepository;
 import kz.logisto.lguserservice.exception.ForbiddenException;
 import kz.logisto.lguserservice.exception.NotFoundException;
@@ -62,6 +63,25 @@ public class OrganizationServiceImpl implements OrganizationService {
     Organization organization = organizationRepository.findById(id)
         .orElseThrow(NotFoundException::new);
     organization.setDeleted(true);
+    organizationRepository.save(organization);
+  }
+
+  @Override
+  public OzonApiKeyModel getOzonApiKey(UUID organizationId) {
+    Organization organization = organizationRepository.findById(organizationId)
+        .filter(org -> !org.isDeleted())
+        .orElseThrow(NotFoundException::new);
+    if (organization.getOzonApiKey() == null || organization.getOzonApiKey().isBlank()) {
+      throw new NotFoundException();
+    }
+    return organizationMapper.toOzonApiKeyModel(organization);
+  }
+
+  @Override
+  public void deleteOzonApiKey(UUID organizationId, Principal principal) {
+    Organization organization = userOrganizationService.getOrganizationIfCanManage(
+        organizationId, principal);
+    organization.setOzonApiKey(null);
     organizationRepository.save(organization);
   }
 }

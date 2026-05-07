@@ -1,6 +1,5 @@
 package kz.logisto.lguserservice.data.model;
 
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,10 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrganizationModel {
+public class OzonApiKeyModel {
 
-  private UUID id;
-  private String name;
-  private String description;
-  private boolean hasOzonIntegration;
+  private String ozonApiKey;
 }
