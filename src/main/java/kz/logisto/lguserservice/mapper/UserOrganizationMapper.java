@@ -24,6 +24,8 @@ public interface UserOrganizationMapper {
   @Mapping(target = "id", source = "organization.id")
   @Mapping(target = "name", source = "organization.name")
   @Mapping(target = "description", source = "organization.description")
+  @Mapping(target = "hasOzonIntegration",
+      expression = "java(userOrganization.getOrganization().getOzonApiKey() != null && !userOrganization.getOrganization().getOzonApiKey().isBlank())")
   OrganizationUserModel toOrganizationModel(UserOrganization userOrganization);
 
   @Mapping(target = "created", ignore = true)

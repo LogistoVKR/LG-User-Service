@@ -16,5 +16,6 @@ public class OrganizationUserModel {
   private UUID id;
   private String name;
   private String description;
+  private boolean hasOzonIntegration;
   private OrganizationRole role;
 }
