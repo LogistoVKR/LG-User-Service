@@ -71,9 +71,6 @@ public class OrganizationServiceImpl implements OrganizationService {
     Organization organization = organizationRepository.findById(organizationId)
         .filter(org -> !org.isDeleted())
         .orElseThrow(NotFoundException::new);
-    if (organization.getOzonApiKey() == null || organization.getOzonApiKey().isBlank()) {
-      throw new NotFoundException();
-    }
     return organizationMapper.toOzonApiKeyModel(organization);
   }
 

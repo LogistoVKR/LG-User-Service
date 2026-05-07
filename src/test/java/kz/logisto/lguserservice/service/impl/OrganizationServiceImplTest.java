@@ -143,7 +143,7 @@ class OrganizationServiceImplTest {
     org.setId(orgId);
     org.setOzonApiKey("ozon-key");
     org.setOzonClientId("client-1");
-    OzonApiKeyModel model = new OzonApiKeyModel("ozon-key", "client-1");
+    OzonApiKeyModel model = new OzonApiKeyModel("ozon-key", "client-1", true);
 
     when(organizationRepository.findById(orgId)).thenReturn(Optional.of(org));
     when(organizationMapper.toOzonApiKeyModel(org)).thenReturn(model);
@@ -152,6 +152,7 @@ class OrganizationServiceImplTest {
 
     assertEquals("ozon-key", result.getOzonApiKey());
     assertEquals("client-1", result.getOzonClientId());
+    assertTrue(result.isHasIntegration());
   }
 
   @Test
@@ -177,27 +178,36 @@ class OrganizationServiceImplTest {
   }
 
   @Test
-  void getOzonApiKey_keyIsNull_throwsNotFound() {
+  void getOzonApiKey_keyIsNull_returnsModelWithoutIntegration() {
     UUID orgId = UUID.randomUUID();
     Organization org = new Organization();
     org.setId(orgId);
     org.setOzonApiKey(null);
+    OzonApiKeyModel model = new OzonApiKeyModel(null, null, false);
 
     when(organizationRepository.findById(orgId)).thenReturn(Optional.of(org));
+    when(organizationMapper.toOzonApiKeyModel(org)).thenReturn(model);
 
-    assertThrows(NotFoundException.class, () -> organizationService.getOzonApiKey(orgId));
+    OzonApiKeyModel result = organizationService.getOzonApiKey(orgId);
+
+    assertFalse(result.isHasIntegration());
+    assertNull(result.getOzonApiKey());
   }
 
   @Test
-  void getOzonApiKey_keyIsBlank_throwsNotFound() {
+  void getOzonApiKey_keyIsBlank_returnsModelWithoutIntegration() {
     UUID orgId = UUID.randomUUID();
     Organization org = new Organization();
     org.setId(orgId);
     org.setOzonApiKey("   ");
+    OzonApiKeyModel model = new OzonApiKeyModel("   ", null, false);
 
     when(organizationRepository.findById(orgId)).thenReturn(Optional.of(org));
+    when(organizationMapper.toOzonApiKeyModel(org)).thenReturn(model);
 
-    assertThrows(NotFoundException.class, () -> organizationService.getOzonApiKey(orgId));
+    OzonApiKeyModel result = organizationService.getOzonApiKey(orgId);
+
+    assertFalse(result.isHasIntegration());
   }
 
   @Test

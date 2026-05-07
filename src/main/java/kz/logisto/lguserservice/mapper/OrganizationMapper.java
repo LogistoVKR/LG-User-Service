@@ -17,12 +17,17 @@ public interface OrganizationMapper {
 
   Organization toEntity(OrganizationDto organizationDto);
 
-  @Mapping(target = "hasOzonIntegration",
-      expression = "java(organization.getOzonApiKey() != null && !organization.getOzonApiKey().isBlank())")
+  @Mapping(target = "hasOzonIntegration", expression = "java(hasOzonIntegration(organization))")
   OrganizationModel toModel(Organization organization);
 
+  @Mapping(target = "hasIntegration", expression = "java(hasOzonIntegration(organization))")
   OzonApiKeyModel toOzonApiKeyModel(Organization organization);
 
   @BeanMapping(nullValuePropertyMappingStrategy = IGNORE)
   void updateEntity(@MappingTarget Organization organization, OrganizationDto organizationDto);
+
+  default boolean hasOzonIntegration(Organization organization) {
+    return organization.getOzonApiKey() != null && !organization.getOzonApiKey().isBlank()
+        && organization.getOzonClientId() != null && !organization.getOzonClientId().isBlank();
+  }
 }

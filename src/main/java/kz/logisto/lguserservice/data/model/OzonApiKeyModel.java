@@ -13,4 +13,5 @@ public class OzonApiKeyModel {
 
   private String ozonApiKey;
   private String ozonClientId;
+  private boolean hasIntegration;
 }
