@@ -47,12 +47,13 @@ class OrganizationServiceImplTest {
 
   @Test
   void create_setsOwnerRole() {
-    OrganizationDto dto = new OrganizationDto("Test Org", "Description", "ozon-key");
+    OrganizationDto dto = new OrganizationDto("Test Org", "Description", "ozon-key", "client-1");
     User user = new User();
     user.setId("user-1");
     Organization org = new Organization();
     org.setId(UUID.randomUUID());
-    OrganizationModel model = new OrganizationModel(org.getId(), "Test Org", "Description", true);
+    OrganizationModel model = new OrganizationModel(org.getId(), "Test Org", "Description", true,
+        "client-1");
 
     when(userService.getOrThrow(principal)).thenReturn(user);
     when(organizationMapper.toEntity(dto)).thenReturn(org);
@@ -63,16 +64,17 @@ class OrganizationServiceImplTest {
 
     assertEquals("Test Org", result.getName());
     assertTrue(result.isHasOzonIntegration());
+    assertEquals("client-1", result.getOzonClientId());
     verify(userOrganizationService).addUserToOrganization(user, org, OWNER);
   }
 
   @Test
   void update_withManageAccess_updatesOrganization() {
     UUID orgId = UUID.randomUUID();
-    OrganizationDto dto = new OrganizationDto("Updated", "New desc", null);
+    OrganizationDto dto = new OrganizationDto("Updated", "New desc", null, null);
     Organization org = new Organization();
     org.setId(orgId);
-    OrganizationModel model = new OrganizationModel(orgId, "Updated", "New desc", false);
+    OrganizationModel model = new OrganizationModel(orgId, "Updated", "New desc", false, null);
 
     when(userOrganizationService.getOrganizationIfCanManage(orgId, principal)).thenReturn(org);
     when(organizationRepository.save(org)).thenReturn(org);
@@ -87,7 +89,7 @@ class OrganizationServiceImplTest {
   @Test
   void update_withoutAccess_throwsForbidden() {
     UUID orgId = UUID.randomUUID();
-    OrganizationDto dto = new OrganizationDto("Updated", "Desc", null);
+    OrganizationDto dto = new OrganizationDto("Updated", "Desc", null, null);
 
     when(userOrganizationService.getOrganizationIfCanManage(orgId, principal))
         .thenThrow(new ForbiddenException());
@@ -140,7 +142,8 @@ class OrganizationServiceImplTest {
     Organization org = new Organization();
     org.setId(orgId);
     org.setOzonApiKey("ozon-key");
-    OzonApiKeyModel model = new OzonApiKeyModel("ozon-key");
+    org.setOzonClientId("client-1");
+    OzonApiKeyModel model = new OzonApiKeyModel("ozon-key", "client-1");
 
     when(organizationRepository.findById(orgId)).thenReturn(Optional.of(org));
     when(organizationMapper.toOzonApiKeyModel(org)).thenReturn(model);
@@ -148,6 +151,7 @@ class OrganizationServiceImplTest {
     OzonApiKeyModel result = organizationService.getOzonApiKey(orgId);
 
     assertEquals("ozon-key", result.getOzonApiKey());
+    assertEquals("client-1", result.getOzonClientId());
   }
 
   @Test
@@ -202,6 +206,7 @@ class OrganizationServiceImplTest {
     Organization org = new Organization();
     org.setId(orgId);
     org.setOzonApiKey("ozon-key");
+    org.setOzonClientId("client-1");
 
     when(userOrganizationService.getOrganizationIfCanManage(orgId, principal)).thenReturn(org);
     when(organizationRepository.save(org)).thenReturn(org);
@@ -209,6 +214,7 @@ class OrganizationServiceImplTest {
     organizationService.deleteOzonApiKey(orgId, principal);
 
     assertNull(org.getOzonApiKey());
+    assertNull(org.getOzonClientId());
     verify(organizationRepository).save(org);
   }
 

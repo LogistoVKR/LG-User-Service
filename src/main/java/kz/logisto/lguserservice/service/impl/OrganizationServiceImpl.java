@@ -82,6 +82,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     Organization organization = userOrganizationService.getOrganizationIfCanManage(
         organizationId, principal);
     organization.setOzonApiKey(null);
+    organization.setOzonClientId(null);
     organizationRepository.save(organization);
   }
 }
