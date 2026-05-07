@@ -71,4 +71,35 @@ class OrganizationIntegrationTest extends BaseIntegrationTest {
 
     assertTrue(found.isEmpty());
   }
+
+  @Test
+  void organization_persistsOzonApiKey() {
+    Organization org = createOrganization("With Key");
+    org.setOzonApiKey("ozon-key");
+    organizationRepository.save(org);
+
+    Organization reloaded = organizationRepository.findById(org.getId()).orElseThrow();
+    assertEquals("ozon-key", reloaded.getOzonApiKey());
+  }
+
+  @Test
+  void organization_createdWithoutOzonApiKey_isNull() {
+    Organization org = createOrganization("Without Key");
+
+    Organization reloaded = organizationRepository.findById(org.getId()).orElseThrow();
+    assertNull(reloaded.getOzonApiKey());
+  }
+
+  @Test
+  void organization_clearOzonApiKey_persistsNull() {
+    Organization org = createOrganization("Clear Key");
+    org.setOzonApiKey("ozon-key");
+    organizationRepository.save(org);
+
+    org.setOzonApiKey(null);
+    organizationRepository.save(org);
+
+    Organization reloaded = organizationRepository.findById(org.getId()).orElseThrow();
+    assertNull(reloaded.getOzonApiKey());
+  }
 }

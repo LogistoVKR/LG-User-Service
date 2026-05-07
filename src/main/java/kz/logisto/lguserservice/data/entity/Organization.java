@@ -30,6 +30,8 @@ public class Organization {
 
   private String description;
 
+  private String ozonApiKey;
+
   private boolean deleted;
 
   @CreationTimestamp
