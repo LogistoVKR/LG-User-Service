@@ -10,6 +10,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -23,6 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class ClientController {
 
   private final ClientService clientService;
+
+  @GetMapping("/{id}")
+  public ResponseEntity<ClientModel> getById(@PathVariable UUID id, Principal principal) {
+    return ResponseEntity.ok(clientService.findById(id, principal));
+  }
 
   @PostMapping
   public ResponseEntity<ClientModel> create(@Valid @RequestBody CreateClientDto dto,

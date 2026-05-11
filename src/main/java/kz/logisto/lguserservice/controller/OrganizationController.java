@@ -92,6 +92,12 @@ public class OrganizationController {
     return ResponseEntity.ok(organizationAccessService.isMember(userId, id));
   }
 
+  @GetMapping("/{id}/clients/membership")
+  public ResponseEntity<ClientModel> getClientByOrganization(@PathVariable UUID id,
+                                                             @RequestParam UUID clientId) {
+    return ResponseEntity.ok(clientService.findClientInOrganization(clientId, id));
+  }
+
   @GetMapping("/{id}/counts")
   public ResponseEntity<CountUserClientModel> countUserClient(@PathVariable UUID id,
                                                               Principal principal) {

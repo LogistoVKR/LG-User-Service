@@ -1,5 +1,10 @@
 package kz.logisto.lguserservice.service.impl;
 
+import jakarta.persistence.criteria.Predicate;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import kz.logisto.lguserservice.data.dto.client.ClientFilterDto;
 import kz.logisto.lguserservice.data.dto.client.CreateClientDto;
 import kz.logisto.lguserservice.data.dto.client.UpdateClientDto;
@@ -13,11 +18,6 @@ import kz.logisto.lguserservice.mapper.ClientMapper;
 import kz.logisto.lguserservice.service.ClientService;
 import kz.logisto.lguserservice.service.OrganizationAccessService;
 import kz.logisto.lguserservice.service.OrganizationService;
-import jakarta.persistence.criteria.Predicate;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,8 +35,18 @@ public class ClientServiceImpl implements ClientService {
   private final OrganizationAccessService organizationAccessService;
 
   @Override
+  public ClientModel findById(UUID id, Principal principal) {
+    Client client = clientRepository.findById(id)
+        .orElseThrow(NotFoundException::new);
+    if (!organizationAccessService.isMember(principal.getName(), client.getOrganizationId())) {
+      throw new NotFoundException();
+    }
+    return clientMapper.toModel(client);
+  }
+
+  @Override
   public Page<ClientModel> findAll(UUID organizationId, ClientFilterDto filter, Pageable pageable,
-                                   Principal principal) {
+      Principal principal) {
     if (!organizationAccessService.isMember(principal.getName(), organizationId)) {
       return Page.empty();
     }
@@ -86,8 +96,16 @@ public class ClientServiceImpl implements ClientService {
     return clientRepository.countByOrganization_Id(organizationId);
   }
 
+  @Override
+  public ClientModel findClientInOrganization(UUID clientId, UUID organizationId) {
+    Client client = clientRepository.findById(clientId)
+        .filter(c -> organizationId.equals(c.getOrganizationId()))
+        .orElseThrow(NotFoundException::new);
+    return clientMapper.toModel(client);
+  }
+
   private Specification<Client> buildSpecification(UUID organizationId,
-                                                   ClientFilterDto filter) {
+      ClientFilterDto filter) {
     return (root, query, cb) -> {
       List<Predicate> andPredicates = new ArrayList<>();
 

@@ -22,7 +22,8 @@ public class OrganizationSecurityConfig extends AbstractSecurityConfig {
                     "/organizations/all",
                     "/organizations/{id}/membership",
                     "/organizations/{id}/warehouse-access",
-                    "/organizations/{id}/ozon-api-key")
+                    "/organizations/{id}/ozon-api-key",
+                    "/organizations/{id}/clients/membership")
                 .hasRole("lg-backend-service")
                 .anyRequest().authenticated())
         .build();
