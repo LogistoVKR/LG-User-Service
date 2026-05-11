@@ -16,4 +16,5 @@ public class OrganizationModel {
   private String name;
   private String description;
   private boolean hasOzonIntegration;
+  private String ozonClientId;
 }

@@ -102,4 +102,35 @@ class OrganizationIntegrationTest extends BaseIntegrationTest {
     Organization reloaded = organizationRepository.findById(org.getId()).orElseThrow();
     assertNull(reloaded.getOzonApiKey());
   }
+
+  @Test
+  void organization_persistsOzonClientId() {
+    Organization org = createOrganization("With Client");
+    org.setOzonClientId("client-1");
+    organizationRepository.save(org);
+
+    Organization reloaded = organizationRepository.findById(org.getId()).orElseThrow();
+    assertEquals("client-1", reloaded.getOzonClientId());
+  }
+
+  @Test
+  void organization_createdWithoutOzonClientId_isNull() {
+    Organization org = createOrganization("Without Client");
+
+    Organization reloaded = organizationRepository.findById(org.getId()).orElseThrow();
+    assertNull(reloaded.getOzonClientId());
+  }
+
+  @Test
+  void organization_clearOzonClientId_persistsNull() {
+    Organization org = createOrganization("Clear Client");
+    org.setOzonClientId("client-1");
+    organizationRepository.save(org);
+
+    org.setOzonClientId(null);
+    organizationRepository.save(org);
+
+    Organization reloaded = organizationRepository.findById(org.getId()).orElseThrow();
+    assertNull(reloaded.getOzonClientId());
+  }
 }

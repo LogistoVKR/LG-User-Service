@@ -19,9 +19,11 @@ public class OrganizationSecurityConfig extends AbstractSecurityConfig {
         .authorizeHttpRequests(authorize ->
             authorize
                 .requestMatchers(HttpMethod.GET,
+                    "/organizations/all",
                     "/organizations/{id}/membership",
                     "/organizations/{id}/warehouse-access",
-                    "/organizations/{id}/ozon-api-key")
+                    "/organizations/{id}/ozon-api-key",
+                    "/organizations/{id}/clients/membership")
                 .hasRole("lg-backend-service")
                 .anyRequest().authenticated())
         .build();

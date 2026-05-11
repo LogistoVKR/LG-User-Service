@@ -1,5 +1,13 @@
 package kz.logisto.lguserservice.service.impl;
 
+import static kz.logisto.lguserservice.data.enums.OrganizationRole.OWNER;
+
+import jakarta.persistence.criteria.Predicate;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import kz.logisto.lguserservice.data.dto.organization.OrganizationAllFilterDto;
 import kz.logisto.lguserservice.data.dto.organization.OrganizationDto;
 import kz.logisto.lguserservice.data.entity.Organization;
 import kz.logisto.lguserservice.data.entity.User;
@@ -13,13 +21,12 @@ import kz.logisto.lguserservice.service.OrganizationAccessService;
 import kz.logisto.lguserservice.service.OrganizationService;
 import kz.logisto.lguserservice.service.UserOrganizationService;
 import kz.logisto.lguserservice.service.UserService;
-import java.security.Principal;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static kz.logisto.lguserservice.data.enums.OrganizationRole.OWNER;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +41,12 @@ public class OrganizationServiceImpl implements OrganizationService {
   @Override
   public Organization getReferenceById(UUID id) {
     return organizationRepository.getReferenceById(id);
+  }
+
+  @Override
+  public Page<OrganizationModel> findAll(OrganizationAllFilterDto filter, Pageable pageable) {
+    return organizationRepository.findAll(buildSpecification(filter), pageable)
+        .map(organizationMapper::toModel);
   }
 
   @Override
@@ -71,9 +84,6 @@ public class OrganizationServiceImpl implements OrganizationService {
     Organization organization = organizationRepository.findById(organizationId)
         .filter(org -> !org.isDeleted())
         .orElseThrow(NotFoundException::new);
-    if (organization.getOzonApiKey() == null || organization.getOzonApiKey().isBlank()) {
-      throw new NotFoundException();
-    }
     return organizationMapper.toOzonApiKeyModel(organization);
   }
 
@@ -82,6 +92,22 @@ public class OrganizationServiceImpl implements OrganizationService {
     Organization organization = userOrganizationService.getOrganizationIfCanManage(
         organizationId, principal);
     organization.setOzonApiKey(null);
+    organization.setOzonClientId(null);
     organizationRepository.save(organization);
+  }
+
+  private Specification<Organization> buildSpecification(OrganizationAllFilterDto filter) {
+    return (root, query, cb) -> {
+      List<Predicate> predicates = new ArrayList<>();
+      predicates.add(cb.equal(root.get("deleted"), false));
+      if (filter.hasOzonIntegration() != null) {
+        Predicate hasIntegration = cb.and(
+            cb.isNotNull(root.get("ozonApiKey")),
+            cb.isNotNull(root.get("ozonClientId"))
+        );
+        predicates.add(filter.hasOzonIntegration() ? hasIntegration : cb.not(hasIntegration));
+      }
+      return cb.and(predicates.toArray(new Predicate[0]));
+    };
   }
 }

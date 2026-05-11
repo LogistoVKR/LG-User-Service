@@ -11,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 
 public interface ClientService {
 
+  ClientModel findById(UUID id, Principal principal);
+
   Page<ClientModel> findAll(UUID organizationId, ClientFilterDto filter, Pageable pageable,
       Principal principal);
 
@@ -21,4 +23,6 @@ public interface ClientService {
   void delete(UUID id, Principal principal);
 
   int countByOrganizationId(UUID organizationId);
+
+  ClientModel findClientInOrganization(UUID clientId, UUID organizationId);
 }

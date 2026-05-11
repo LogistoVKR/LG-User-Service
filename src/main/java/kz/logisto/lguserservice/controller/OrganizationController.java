@@ -1,6 +1,7 @@
 package kz.logisto.lguserservice.controller;
 
 import kz.logisto.lguserservice.data.dto.client.ClientFilterDto;
+import kz.logisto.lguserservice.data.dto.organization.OrganizationAllFilterDto;
 import kz.logisto.lguserservice.data.dto.organization.OrganizationDto;
 import kz.logisto.lguserservice.data.dto.organization.OrganizationFilterDto;
 import kz.logisto.lguserservice.data.dto.organization.UserOrganizationDto;
@@ -47,6 +48,13 @@ public class OrganizationController {
   private final UserOrganizationService userOrganizationService;
   private final OrganizationAccessService organizationAccessService;
 
+  @GetMapping("/all")
+  public ResponseEntity<Page<OrganizationModel>> getAllOrganizations(
+      @ModelAttribute OrganizationAllFilterDto filter,
+      @PageableDefault Pageable pageable) {
+    return ResponseEntity.ok(organizationService.findAll(filter, pageable));
+  }
+
   @GetMapping
   public ResponseEntity<Page<OrganizationUserModel>> getOrganizations(
       @ModelAttribute OrganizationFilterDto filter, @PageableDefault Pageable pageable,
@@ -82,6 +90,12 @@ public class OrganizationController {
   public ResponseEntity<Boolean> isMember(@PathVariable UUID id,
                                           @RequestParam @Size(max = 36) String userId) {
     return ResponseEntity.ok(organizationAccessService.isMember(userId, id));
+  }
+
+  @GetMapping("/{id}/clients/membership")
+  public ResponseEntity<ClientModel> getClientByOrganization(@PathVariable UUID id,
+                                                             @RequestParam UUID clientId) {
+    return ResponseEntity.ok(clientService.findClientInOrganization(clientId, id));
   }
 
   @GetMapping("/{id}/counts")
